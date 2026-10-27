@@ -31,11 +31,14 @@
 python -m unittest discover tests
 ```
 
-Запуск CLI приложения:
-```bash
-# Windows
-run.bat --package org.apache.commons:commons-lang3:3.12.0
+## Примеры использования
+### Этап 1. Минимальный прототип с конфигурацией
+Вывод параметров командной строки в формате ключ-значение.
 
-# Linux / macOS
-./run.sh --package org.apache.commons:commons-lang3:3.12.0
+### Этап 2. Сбор данных о зависимостях Maven
+Извлечение прямых зависимостей заданного пакета из репозитория без
+использования сторонних библиотек и пакетных менеджеров:
+```bash
+run.bat --package com.google.guava:guava:31.1-jre
 ```
+
