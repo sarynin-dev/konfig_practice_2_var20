@@ -1,0 +1,4 @@
+# Linear dependency graph
+A: B
+B: C
+C:

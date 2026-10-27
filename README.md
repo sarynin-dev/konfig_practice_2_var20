@@ -42,3 +42,11 @@ python -m unittest discover tests
 run.bat --package com.google.guava:guava:31.1-jre
 ```
 
+### Этап 3. Основные операции и тестовый режим
+Построение графа зависимостей с помощью итеративного алгоритма DFS
+(без рекурсии), обработка циклических зависимостей и работа с тестовым
+репозиторием (пакеты из заглавных латинских букв):
+```bash
+run.bat --test-mode --repo tests/data/cycle.txt --package A
+```
+
