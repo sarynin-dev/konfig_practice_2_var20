@@ -75,6 +75,27 @@ class TestGraph(unittest.TestCase):
         self.assertTrue(graph.cycles)
         self.assertIn(("A", "A"), graph.cycles)
 
+    def test_load_order_linear(self) -> None:
+        """Test bottom-up dependency load order on linear graph."""
+        path = os.path.join(DATA_DIR, "linear.txt")
+        repo = parse_test_repo_file(path)
+        graph = build_graph_dfs("A", lambda node: repo.get(node, []))
+        self.assertEqual(graph.load_order, ["C", "B", "A"])
+
+    def test_load_order_branching(self) -> None:
+        """Test dependency load order on diamond branching graph."""
+        path = os.path.join(DATA_DIR, "branching.txt")
+        repo = parse_test_repo_file(path)
+        graph = build_graph_dfs("A", lambda node: repo.get(node, []))
+        self.assertEqual(graph.load_order[-1], "A")
+        self.assertEqual(graph.load_order[0], "D")
+        self.assertTrue(
+            graph.load_order.index("D") < graph.load_order.index("B")
+        )
+        self.assertTrue(
+            graph.load_order.index("D") < graph.load_order.index("C")
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

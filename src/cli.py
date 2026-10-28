@@ -5,6 +5,7 @@ from src.config import Config, ConfigError, parse_arguments
 from src.graph import (
     DependencyGraph,
     build_graph_dfs,
+    format_load_order,
     parse_test_repo_file,
 )
 from src.maven import MavenError, get_direct_dependencies
@@ -42,6 +43,8 @@ def run_test_mode(config: Config) -> int:
             lambda node: repo_data.get(node, []),
         )
         print(format_graph_summary(graph))
+        print()
+        print(format_load_order(graph))
         return EXIT_SUCCESS
     except Exception as err:
         sys.stderr.write(f"Ошибка в тестовом режиме: {err}\n")
@@ -69,6 +72,8 @@ def run_maven_mode(config: Config) -> int:
     try:
         graph = build_graph_dfs(config.package, _fetch_neighbors)
         print(format_graph_summary(graph))
+        print()
+        print(format_load_order(graph))
         return EXIT_SUCCESS
     except Exception as err:
         sys.stderr.write(f"Ошибка в режиме Maven: {err}\n")

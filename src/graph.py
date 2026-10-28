@@ -10,6 +10,7 @@ COLON_CHAR = ":"
 COMMA_CHAR = ","
 ARROW_STR = "->"
 EMPTY_STR = ""
+START_INDEX = 1
 
 
 @dataclass
@@ -19,10 +20,19 @@ class DependencyGraph:
     root: str
     adjacency: dict[str, list[str]] = field(default_factory=dict)
     cycles: list[tuple[str, str]] = field(default_factory=list)
+    load_order: list[str] = field(default_factory=list)
 
     def get_dependencies(self, node: str) -> list[str]:
         """Return direct dependencies of given node."""
         return self.adjacency.get(node, [])
+
+
+def format_load_order(graph: DependencyGraph) -> str:
+    """Format dependency load order (bottom-up / topological)."""
+    lines = [f"Порядок загрузки зависимостей для {graph.root}:"]
+    for idx, pkg in enumerate(graph.load_order, start=START_INDEX):
+        lines.append(f"  {idx}. {pkg}")
+    return "\n".join(lines)
 
 
 class GraphError(ValueError):
@@ -119,5 +129,7 @@ def build_graph_dfs(
 
         if not pushed:
             state[current] = STATE_VISITED
+            if current not in graph.load_order:
+                graph.load_order.append(current)
 
     return graph
