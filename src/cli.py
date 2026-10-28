@@ -9,6 +9,7 @@ from src.graph import (
     parse_test_repo_file,
 )
 from src.maven import MavenError, get_direct_dependencies
+from src.visualizer import export_graph, format_ascii_tree
 
 EXIT_SUCCESS = 0
 EXIT_FAILURE = 1
@@ -29,6 +30,19 @@ def format_graph_summary(graph: DependencyGraph) -> str:
     return "\n".join(lines)
 
 
+def _display_and_export(graph: DependencyGraph, config: Config) -> None:
+    """Print summaries, ASCII tree, and export D2 and PNG diagrams."""
+    print(format_graph_summary(graph))
+    print()
+    print(format_load_order(graph))
+    if config.ascii_tree:
+        print("\nДерево зависимостей (ASCII):")
+        print(format_ascii_tree(graph))
+    d2_path, png_path = export_graph(graph, config.output)
+    print(f"\nДиаграмма D2 сохранена в: {d2_path}")
+    print(f"Изображение графа сохранено в: {png_path}")
+
+
 def run_test_mode(config: Config) -> int:
     """Execute dependency resolution in test repository mode."""
     try:
@@ -42,9 +56,7 @@ def run_test_mode(config: Config) -> int:
             config.package,
             lambda node: repo_data.get(node, []),
         )
-        print(format_graph_summary(graph))
-        print()
-        print(format_load_order(graph))
+        _display_and_export(graph, config)
         return EXIT_SUCCESS
     except Exception as err:
         sys.stderr.write(f"Ошибка в тестовом режиме: {err}\n")
@@ -71,9 +83,7 @@ def run_maven_mode(config: Config) -> int:
 
     try:
         graph = build_graph_dfs(config.package, _fetch_neighbors)
-        print(format_graph_summary(graph))
-        print()
-        print(format_load_order(graph))
+        _display_and_export(graph, config)
         return EXIT_SUCCESS
     except Exception as err:
         sys.stderr.write(f"Ошибка в режиме Maven: {err}\n")
