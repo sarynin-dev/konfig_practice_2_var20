@@ -2,6 +2,7 @@
 
 import ast
 import os
+import tokenize
 import unittest
 
 MAX_LINE_LENGTH = 79
@@ -131,6 +132,32 @@ class TestCodeStyle(unittest.TestCase):
                 f"Magic number {getattr(item, 'value', None)} in comparison "
                 f"at line {node.lineno} in {file_path}",
             )
+
+    def test_no_inline_comments(self) -> None:
+        """Check rule K1: no comments used instead of docstrings."""
+        for file_path in self.get_py_files():
+            with tokenize.open(file_path) as fp:
+                for tok in tokenize.generate_tokens(fp.readline):
+                    if tok.type == tokenize.COMMENT:
+                        msg = (
+                            f"Rule K1 violation in {file_path}:"
+                            f"{tok.start[0]}: {tok.string}"
+                        )
+                        self.fail(msg)
+
+    def test_import_aliases_pep8(self) -> None:
+        """Check rule I1: import aliases follow snake_case."""
+        for file_path in self.get_py_files():
+            with open(file_path, "r", encoding="utf-8") as fp:
+                tree = ast.parse(fp.read(), filename=file_path)
+            for node in ast.walk(tree):
+                if isinstance(node, (ast.Import, ast.ImportFrom)):
+                    for alias in node.names:
+                        if alias.asname and not alias.asname.islower():
+                            self.fail(
+                                f"Rule I1 violation: alias {alias.asname} "
+                                f"not snake_case in {file_path}"
+                            )
 
 
 if __name__ == "__main__":

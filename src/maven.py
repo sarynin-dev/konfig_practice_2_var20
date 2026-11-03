@@ -3,8 +3,8 @@
 import re
 import urllib.error
 import urllib.request
-import xml.etree.ElementTree as ET
 from dataclasses import dataclass
+from xml.etree.ElementTree import Element, fromstring
 
 HTTP_TIMEOUT_SECONDS = 15
 HTTP_OK_STATUS = 200
@@ -113,7 +113,7 @@ def resolve_latest_version(repo_url: str, coord: MavenCoordinate) -> str:
         f"{base}/{group_path}/{coord.artifact_id}/maven-metadata.xml"
     )
     content = _fetch_url_content(meta_url)
-    root = ET.fromstring(content)
+    root = fromstring(content)
     release = root.findtext(".//release")
     latest = root.findtext(".//latest")
     version = release or latest
@@ -139,7 +139,7 @@ def fetch_pom(repo_url: str, coord: MavenCoordinate) -> tuple[str, str]:
     return version, content
 
 
-def _extract_properties(root: ET.Element) -> dict[str, str]:
+def _extract_properties(root: Element) -> dict[str, str]:
     """Extract Maven POM property mapping."""
     props: dict[str, str] = {}
     for elem in root:
@@ -160,7 +160,7 @@ def _substitute_properties(val: str, props: dict[str, str]) -> str:
     return PROP_PATTERN.sub(_replace, val)
 
 
-def _is_direct_dependency(dep_elem: ET.Element) -> bool:
+def _is_direct_dependency(dep_elem: Element) -> bool:
     """Check if dependency should be included in direct dependencies."""
     scope_val = dep_elem.findtext(TAG_SCOPE)
     if not scope_val:
@@ -175,7 +175,7 @@ def _is_direct_dependency(dep_elem: ET.Element) -> bool:
 
 
 def _parse_single_dep(
-    elem: ET.Element,
+    elem: Element,
     props: dict[str, str],
 ) -> MavenCoordinate | None:
     """Parse a single dependency element into MavenCoordinate."""
@@ -205,7 +205,7 @@ def _parse_single_dep(
 
 def extract_direct_dependencies(pom_xml: str) -> list[MavenCoordinate]:
     """Extract direct dependencies from POM XML content."""
-    root = ET.fromstring(pom_xml)
+    root = fromstring(pom_xml)
     props = _extract_properties(root)
     results: list[MavenCoordinate] = []
 

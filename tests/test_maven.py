@@ -70,7 +70,6 @@ class TestMaven(unittest.TestCase):
         dep_names = [d.to_string() for d in deps]
         self.assertIn("org.slf4j:slf4j-api:2.5.0", dep_names)
         self.assertIn("com.google.guava:guava:31.0", dep_names)
-        # junit with test scope must be excluded
         self.assertNotIn("junit:junit:4.13.2", dep_names)
 
     def test_empty_dependencies_pom(self) -> None:
